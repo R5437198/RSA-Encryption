@@ -3,46 +3,46 @@ import random as r
 import numpy as np
 from sympy import sieve
 
-def input_data(): #データ入力
+def input_data(): # データ入力
     data = input("Type a original message >> ")
     data = data.encode('utf-8', 'replace').decode('utf-8')
     return(data)
 
-def convert_char(char): #文字 -> 数字
+def convert_char(char): # 文字 -> 数字
     return([ord(i) for i in char])
         
-def convert_number(num): #数字 -> 文字
+def convert_number(num): # 数字 -> 文字
     return([chr(i) for i in num])
 
-def encrypto(data, N, E): #暗号化
+def encrypto(data, N, E): # 暗号化
     encrypted_data = [pow(i, E, N) for i in data]
     return (encrypted_data)
 
-def decrypto(data, N, D): #復号化
+def decrypto(data, N, D): # 復号化
     decrypted_data = [pow(i, D, N) for i in data]
     return (decrypted_data)
         
-def lcm(x, y): #xとyの最小公倍数を求める
+def lcm(x, y): # xとyの最小公倍数を求める
     return((x * y) // m.gcd(x, y))
 
-def is_prime(x): #ミラーラビンテスト
+def is_prime(x): # ミラーラビンテスト
     x = abs(x)
     
-    #計算するまでもなく判定できるものははじく
+    # 計算するまでもなく判定できるものをはじく
     if x == 2: return True
     if x < 2 or x&1 == 0: return False
 
-    #n-1=2^s*dとし（但しaは整数、dは奇数)、dを求める
+    # n-1=2^s*dとし（但しaは整数、dは奇数)、dを求める
     d = (x - 1) >> 1
     while d&1 == 0:
         d >>= 1
     
-    #判定をk回繰り返す
+    # 判定をk回繰り返す
     for i in range(100):
         a = r.randint(1,x-1)
         t = d
         y = pow(a, t, x)
-        #[0,s-1]の範囲すべてをチェック
+        # [0,s-1]の範囲すべてをチェック
         while t != x-1 and y != 1 and y != x-1: 
             y = pow(y,2,x)
             t <<= 1
@@ -50,7 +50,7 @@ def is_prime(x): #ミラーラビンテスト
             return(False)
     return(True)
 
-def generate_prime_mirror(): #素数生成
+def generate_prime_mirror(): # 素数生成（ミラーラビンテスト）
     while True:
         while True:
             p_number = np.random.randint(1000)
@@ -68,7 +68,7 @@ def generate_prime_mirror(): #素数生成
             break
     return (p, q)
 
-def generate_prime_era(): #素数生成 
+def generate_prime_era(): # 素数生成（エラストテネスのふるい）
     p_number = [i for i in sieve.primerange(2, 100000)]
     q_number = p_number
 
@@ -79,7 +79,7 @@ def generate_prime_era(): #素数生成
             break
     return (p, q)
         
-def generate_keys(): #鍵の生成
+def generate_keys(): # 鍵の生成
     p, q = generate_prime_mirror()
     N = p * q
     L = lcm(p-1, q-1)
@@ -99,7 +99,7 @@ def generate_keys(): #鍵の生成
 
 
 if __name__ == '__main__':    
-    N, D, E = generate_keys()
+    N, D, E = generate_keys() # D：公開鍵, E：秘密鍵 
     print('Private_key >> %d, %d' % (D, N))
     print('Public_key >> %d, %d' % (E, N))
 
