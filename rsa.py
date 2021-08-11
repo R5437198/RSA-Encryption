@@ -3,29 +3,45 @@ import random as r
 import numpy as np
 from sympy import sieve
 
-def input_data(): # データ入力
+
+def input_data():
+    """ データ入力 """
     data = input("Type a original message >> ")
     data = data.encode('utf-8', 'replace').decode('utf-8')
     return(data)
 
-def convert_char(char): # 文字 -> 数字
-    return([ord(i) for i in char])
-        
-def convert_number(num): # 数字 -> 文字
-    return([chr(i) for i in num])
 
-def encrypto(data, N, E): # 暗号化
+def convert_char(char):
+    """ 文字 -> 数字 """
+    converted_text_list = [ord(i) for i in char]
+    return(converted_text_list)
+        
+        
+def convert_number(num):
+    """ 数字 -> 文字 """
+    conveted_text_list = [chr(i) for i in num]
+    return(conveted_text_list)
+
+
+def encrypto(data, N, E):
+    """ 暗号化 """
     encrypted_data = [pow(i, E, N) for i in data]
     return (encrypted_data)
 
-def decrypto(data, N, D): # 復号化
+
+def decrypto(data, N, D):
+    """ 復号化 """
     decrypted_data = [pow(i, D, N) for i in data]
     return (decrypted_data)
+       
         
-def lcm(x, y): # xとyの最小公倍数を求める
+def lcm(x, y):
+    """ xとyの最小公倍数を求める """
     return((x * y) // m.gcd(x, y))
 
-def is_prime(x): # ミラーラビンテスト
+
+def is_prime(x):
+    """ ミラーラビンテスト """
     x = abs(x)
     
     # 計算するまでもなく判定できるものをはじく
@@ -47,10 +63,13 @@ def is_prime(x): # ミラーラビンテスト
             y = pow(y,2,x)
             t <<= 1
         if y != x-1 and t&1 == 0:
-            return(False)
-    return(True)
+            return False
+    return True
 
-def generate_prime_mirror(): # 素数生成（ミラーラビンテスト）
+
+def generate_prime_mirror():
+    """ 素数生成（ミラーラビンテスト）"""
+    
     while True:
         while True:
             p_number = np.random.randint(1000)
@@ -68,7 +87,9 @@ def generate_prime_mirror(): # 素数生成（ミラーラビンテスト）
             break
     return (p, q)
 
-def generate_prime_era(): # 素数生成（エラストテネスのふるい）
+
+def generate_prime_era():
+    """ 素数生成（エラストテネスのふるい） """
     p_number = [i for i in sieve.primerange(2, 100000)]
     q_number = p_number
 
@@ -78,8 +99,10 @@ def generate_prime_era(): # 素数生成（エラストテネスのふるい）
         if p != q:
             break
     return (p, q)
+       
         
-def generate_keys(): # 鍵の生成
+def generate_keys():
+    """ 鍵の生成 """
     p, q = generate_prime_mirror()
     N = p * q
     L = lcm(p-1, q-1)
