@@ -11,13 +11,13 @@ def input_data():
     return(data)
 
 
-def convert_char(char):
+def convert_char_to_number(char):
     """ 文字 -> 数字 """
     converted_text_list = [ord(i) for i in char]
     return(converted_text_list)
         
         
-def convert_number(num):
+def convert_number_to_char(num):
     """ 数字 -> 文字 """
     conveted_text_list = [chr(i) for i in num]
     return(conveted_text_list)
@@ -127,12 +127,12 @@ if __name__ == '__main__':
     print('Public_key >> %d, %d' % (E, N))
 
     data = input_data()
-    data = convert_char(data)
+    data = convert_char_to_number(data)
     encrypted_data = encrypto(data, N, E)
     data = ''.join(map(str,encrypted_data))
     print("Encrypted_data >> " + str(data))
 
     decrypted_data = decrypto(encrypted_data, N, D)
-    decrypted_data = convert_number(decrypted_data)
+    decrypted_data = convert_number_to_char(decrypted_data)
     data = ''.join(decrypted_data)
     print("Decrypted_data >> " + str(data))
