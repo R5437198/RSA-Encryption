@@ -1,115 +1,114 @@
-import math as m
-import random as r
+import math
 import numpy as np
-from sympy import sieve
 
-def input_data(): # データ入力
-    data = input("Type a original message >> ")
-    data = data.encode('utf-8', 'replace').decode('utf-8')
-    return(data)
 
-def convert_char(char): # 文字 -> 数字
-    return([ord(i) for i in char])
-        
-def convert_number(num): # 数字 -> 文字
-    return([chr(i) for i in num])
+class ConvertText:
+    """文字コードを変換"""
 
-def encrypto(data, N, E): # 暗号化
-    encrypted_data = [pow(i, E, N) for i in data]
-    return (encrypted_data)
+    @staticmethod
+    def convert_to_number(text):
+        """ 文字 -> 数字 """
+        number = [ord(string) for string in text]
+        return number
 
-def decrypto(data, N, D): # 復号化
-    decrypted_data = [pow(i, D, N) for i in data]
-    return (decrypted_data)
-        
-def lcm(x, y): # xとyの最小公倍数を求める
-    return((x * y) // m.gcd(x, y))
+    @staticmethod
+    def convert_to_string(text):
+        """ 数字 -> 文字 """
+        string = [chr(string) for string in text]
+        return string
 
-def is_prime(x): # ミラーラビンテスト
-    x = abs(x)
-    
-    # 計算するまでもなく判定できるものをはじく
-    if x == 2: return True
-    if x < 2 or x&1 == 0: return False
+    @staticmethod
+    def convert_list_to_text(x):
+        """ リストから要素を抜き出す """
+        return str(''.join(map(str, x)))
 
-    # n-1=2^s*dとし（但しaは整数、dは奇数)、dを求める
-    d = (x - 1) >> 1
-    while d&1 == 0:
-        d >>= 1
-    
-    # 判定をk回繰り返す
-    for i in range(100):
-        a = r.randint(1,x-1)
-        t = d
-        y = pow(a, t, x)
-        # [0,s-1]の範囲すべてをチェック
-        while t != x-1 and y != 1 and y != x-1: 
-            y = pow(y,2,x)
-            t <<= 1
-        if y != x-1 and t&1 == 0:
-            return(False)
-    return(True)
 
-def generate_prime_mirror(): # 素数生成（ミラーラビンテスト）
-    while True:
+class Calculate:
+    """ 計算する """
+
+    @classmethod
+    def generate_prime(cls, upper_limit=10000):
+        """ 素数生成 - ミラーラビンテスト """
         while True:
-            p_number = np.random.randint(1000)
-            if is_prime(p_number) == True:
-                p = p_number
+            while True:
+                p_number = np.random.randint(upper_limit)
+                if cls.is_prime(p_number):
+                    p = p_number
+                    break
+            while True:
+                q_number = np.random.randint(upper_limit)
+                if cls.is_prime(q_number):
+                    q = q_number
+                    break
+            if p != q:
                 break
-            
-        while True:
-            q_number = np.random.randint(1000)
-            if is_prime(q_number) == True:
-                q = q_number
+        return p, q
+
+    @staticmethod
+    def is_prime(n):
+        sqrt_n = math.ceil(math.sqrt(n))
+        for i in range(2, sqrt_n):
+            if n % i == 0:
+                return False
+        return True
+
+
+class Crypt:
+    """ 暗号化・復号化を行う """
+
+    @classmethod
+    def crypt(cls):
+        key_generation, encryption, decryption = cls.generate_keys()
+        print("")
+        print('Public_key >> %d' % encryption)
+        print('Private_key >> %d' % decryption)
+        raw_text = input("Type a text >> ")
+        print('raw_text >>>', raw_text)
+
+        # 暗号化
+        number = ConvertText.convert_to_number(raw_text)
+        encrypted_data = cls.encrypt(number, key_generation, encryption)
+        print("Encrypted_data >> ", ConvertText.convert_list_to_text(encrypted_data))
+        # 復号化
+        decrypted_data = cls.decrypt(encrypted_data, key_generation, decryption)
+        text = ConvertText.convert_to_string(decrypted_data)
+        print("Decrypted_data >> " + ConvertText.convert_list_to_text(text))
+
+    @staticmethod
+    def encrypt(data, key_generation, encryption):
+        """ 暗号化 """
+        encrypted_data = [pow(i, encryption, key_generation) for i in data]
+        return encrypted_data
+
+    @staticmethod
+    def decrypt(data, key_generation, decryption):
+        """復号化"""
+        decrypted_data = [pow(i, decryption, key_generation) for i in data]
+        return decrypted_data
+
+    @staticmethod
+    def generate_keys():
+        """ 秘密鍵と公開鍵の生成 """
+        # 公開鍵と秘密鍵の片割れ
+        encryption, decryption = 0, 0
+        # 素数
+        prime_1, prime_2 = Calculate.generate_prime()
+        # 暗号化アルゴリズム
+        key_generation = prime_1 * prime_2
+        # 最小公倍数
+        least_common_multiple = math.lcm(prime_1-1, prime_2-1)
+        # 公開鍵
+        for i in range(2, least_common_multiple):
+            if math.gcd(i, least_common_multiple) == 1:
+                encryption = i
                 break
-        
-        if p != q:
-            break
-    return (p, q)
-
-def generate_prime_era(): # 素数生成（エラストテネスのふるい）
-    p_number = [i for i in sieve.primerange(2, 100000)]
-    q_number = p_number
-
-    while True:
-        p = r.choice(p_number)
-        q = r.choice(q_number)
-        if p != q:
-            break
-    return (p, q)
-        
-def generate_keys(): # 鍵の生成
-    p, q = generate_prime_mirror()
-    N = p * q
-    L = lcm(p-1, q-1)
-    
-    # 公開鍵
-    for i in range(2, L):
-        if m.gcd(i, L) == 1:
-            E = i
-            break
-    
-    # 秘密鍵
-    for i in range(2, L):
-        if (E * i) % L == 1:
-            D = i
-            break
-    return (N, D, E)
+        # 秘密鍵
+        for i in range(2, least_common_multiple):
+            if (encryption * i) % least_common_multiple == 1:
+                decryption = i
+                break
+        return key_generation, encryption, decryption
 
 
 if __name__ == '__main__':    
-    N, D, E = generate_keys() # D：公開鍵, E：秘密鍵 
-    print('Private_key >> %d, %d' % (D, N))
-    print('Public_key >> %d, %d' % (E, N))
-
-    data = input_data()
-    data = convert_char(data)
-    encrypted_data = encrypto(data, N, E)
-    data = ''.join(map(str,encrypted_data))
-    print("Encrypted_data >> " + str(data))
-
-    decrypted_data = decrypto(encrypted_data, N, D)
-    decrypted_data = convert_number(decrypted_data)
-    data = ''.join(decrypted_data)
-    print("Decrypted_data >> " + str(data))
+    Crypt.crypt()
